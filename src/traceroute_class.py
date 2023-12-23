@@ -26,6 +26,11 @@ class HandleTraceroute:
         else:
             return True
 
+
+    def set_external_ip_address_to_env_var(self) -> None:
+        pass
+        # output = self.external_address
+
     def do_traceroute(self, target='8.8.8.8') -> None:
         # execute
         hop = traceroute(target)
@@ -54,9 +59,7 @@ class HandleTraceroute:
     def set_external_ip_address(self, input) -> None:
         self. external_address = input
 
-    def set_external_ip_address_to_env_var(self) -> None:
-        pass
-        # output = self.external_address
+
 
     def check_hops_for_external_ip(self) -> str:
         pass
@@ -64,9 +67,7 @@ class HandleTraceroute:
     def get_external_ip_address(self) -> str:
         return self.external_address
 
-    def get_existing_external_ip_address(self) -> str:
-        machine_var = os.environ['EXT_IP_ADDRESS']
-        return machine_var
+
 
     def show_details(self) -> None:
         print('This is...{}'.format(self.internal_address))
