@@ -1,7 +1,8 @@
 try:
-    import src.traceroute_class as trace
+    import testing.traceroute_class as trace
     import sys
     import json
+    import host_machine_class
 except ImportError as e:
     sys.exit("Importing error: " + str(e))
 
@@ -13,8 +14,9 @@ def do_trace() -> None:
     """
     a = trace.HandleTraceroute()
     a.do_traceroute()
-    a.check_hops_for_external_ip()
-    a.get_external_ip_address()
+    ext_address = a.check_hops_for_external_ip_and_return()
+    print("This should be an external IP address".format(ext_address))
+    host_machine_class.set_host_environment_variables(ext_address)
 
 def check_for_change() -> None:
     """

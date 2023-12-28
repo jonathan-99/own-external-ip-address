@@ -3,6 +3,7 @@ try:
     import sys
     import json
     import os
+    import host_machine_class
 except ImportError as e:
     sys.exit("Importing error: " + str(e))
 
@@ -20,16 +21,17 @@ class HandleTraceroute:
         self.external_address = ''
         self.hops = []
 
+    def is_external_address_empty(self) -> bool:
+        if not self.external_address:
+            return False
+        else:
+            return True
+
     def check_ip_address_if_external(self, input_var) -> bool:
         if input_var in self.internal_address:
             return False
         else:
             return True
-
-
-    def set_external_ip_address_to_env_var(self) -> None:
-        pass
-        # output = self.external_address
 
     def do_traceroute(self, target='8.8.8.8') -> None:
         # execute
@@ -43,31 +45,41 @@ class HandleTraceroute:
         # loop
             last_distance = h.distance
 
-    def print_hops(self) -> None:
+    def __print_hops(self) -> None:
         for h in self.hops:
             print(h)
 
-    def get_hops(self) -> json:
+    def __get_hops(self) -> json:
         output = ''
         for h in self.hops:
             output += h
         return {'hops': output}
 
-    def test_loop_return(self) -> json:
+    def __test_loop_return(self) -> json:
         return {'test': str([h for h in self.hops])}
 
-    def set_external_ip_address(self, input) -> None:
-        self. external_address = input
+    def set_external_ip_address(self, input_value: str) -> None:
+        try:
+            host_machine_class.set_host_environment_variables(input_value)
+        except Exception as err:
+            print('Error: {}'.format(err))
 
 
-
-    def check_hops_for_external_ip(self) -> str:
-        pass
+    def check_hops_for_external_ip_and_return(self) -> str:
+        for h in self.hops:
+            if self.internal_address == h:
+                self.external_address = h
+                return self.external_address
+            else:
+                pass
 
     def get_external_ip_address(self) -> str:
+        self.external_address = host_machine_class.get_host_external_ip_address()
         return self.external_address
 
-
-
     def show_details(self) -> None:
-        print('This is...{}'.format(self.internal_address))
+        everything = str(self.internal_address) + \
+            str(self.external_address) + \
+            str(self.hops) + \
+            self.a_pipper
+        print('This is everything...{}'.format(everything))
