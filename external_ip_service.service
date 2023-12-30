@@ -1,0 +1,11 @@
+[Unit]
+Description=This is a service for executing ....
+Documentation=
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/usr/bin/python3 /opt/mnt/own-external-ip-address/main.py 30
+
+[Install]
+WantedBy=multi-user.target

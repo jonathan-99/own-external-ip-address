@@ -1,9 +1,13 @@
+#!/usr/bin/env python3
+
 try:
-    from icmplib import traceroute
+    import src.icmplib_traceroute as icmplib_function
+    import src.scapy_traceroute as scapy_function
+    import src.functions as functions
     import sys
     import json
     import os
-    import host_machine_class
+    import src.host_machine_class
 except ImportError as e:
     sys.exit("Importing error: " + str(e))
 
@@ -20,6 +24,7 @@ class HandleTraceroute:
         self.a_pipper = '169'
         self.external_address = ''
         self.hops = []
+        functions.error_trapping([self.internal_address, self.external_address, self.hops])
 
     def is_external_address_empty(self) -> bool:
         if not self.external_address:
@@ -33,17 +38,22 @@ class HandleTraceroute:
         else:
             return True
 
-    def do_traceroute(self, target='8.8.8.8') -> None:
-        # execute
-        hop = traceroute(target)
-        last_distance = 0
-        for h in hop:
-            if last_distance + 1 != h.distance:
-                print('gateways ae not responding')
-        # save hop to internal values
-            self.hops.append(h.address)
-        # loop
-            last_distance = h.distance
+    def do_icmplib_traceroute(self, target='8.8.8.8') -> str:
+        functions.error_trapping([target, '** do_traceroute'])
+        list_hops, return_result = icmplib_function.icmplib_traceroute(target)
+        for l in list_hops:
+            self.hops.append(l)
+        return return_result
+
+    def do_scapy_traceroute(self, target='8.8.8.8') -> str:
+        output, errors = scapy_function.scapy_traceroute(target)
+        if not errors:
+            functions.error_trapping([output, errors])
+            return output
+        else:
+            functions.error_trapping([output, errors])
+            print("Errors with scapy traceroute - {}".format(errors))
+            return output
 
     def __print_hops(self) -> None:
         for h in self.hops:
