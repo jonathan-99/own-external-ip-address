@@ -1,5 +1,5 @@
 try:
-    from icmplib import traceroute
+    import src.functions as functions
     import sys
     import json
     import os
@@ -9,7 +9,7 @@ except ImportError as e:
 ext_ip_address = 'EXT_IP_ADDRESS'
 
 def set_host_environment_variables(address) -> None:
-    print("Here: {}".format(ext_ip_address, type(address), address))
+    functions.error_trapping(['setting host machine()', ext_ip_address, type(address), address])
     try:
         os.environ[ext_ip_address] = address
     except OSError as err:

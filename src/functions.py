@@ -19,16 +19,16 @@ def do_trace(option='A') -> None:
     """
     a = trace.HandleTraceroute()
     if option=='A':
-        error_trapping(['option A', a])
+        # error_trapping(['option A', a])
         output_result = a.do_icmplib_traceroute()
         ext_address = a.check_hops_for_external_ip_and_return()
         print("This should be an external IP address".format(ext_address))
         host_machine_class.set_host_environment_variables(ext_address)
     else:
-        error_trapping(['option other', a])
+        # error_trapping(['option other', a.external_address, a.show_details()])
         output_result = a.do_scapy_traceroute()
 
-    error_trapping(['tracereulst in do_trace()', output_result])
+    # error_trapping(['trace result in do_trace()', output_result])
 def check_for_change() -> None:
     """
     This compares the machine's environmental variable for change.
