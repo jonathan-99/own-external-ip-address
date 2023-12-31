@@ -14,5 +14,6 @@ Windows machine first.
  - 
 # References / link
 https://scapy.readthedocs.io/en/latest/usage.html#dns-traceroute
+ - return of a trace is in two parts - https://scapy.readthedocs.io/en/latest/api/scapy.plist.html#scapy.plist.QueryAnswer
 pypi.org/project/icmplib
 

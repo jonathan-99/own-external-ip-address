@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
 
 try:
-    import src.icmplib_traceroute as icmplib_function
-    import src.scapy_traceroute as scapy_function
     import src.functions as functions
     import sys
     import json
     import os
-    import src.host_machine_class as host_machine
 except ImportError as e:
     sys.exit("Importing error: " + str(e))
 
 class Hop:
     """
-    This is a sub-class of the traceroute to handle the details of each hop.
+    This is a sub_class of the traceroute to handle the details of each hop.
     Sample scapy return that nees to be handled.
     QueryAnswer
     (query=<IP  id=23970 frag=0 ttl=1 proto=udp dst=1.1.1.1 |
@@ -57,6 +54,16 @@ class Hop:
     def add_src(self, value) -> None:
         self.src = str(value)
 
+    def get_ip_address(self, direction='dst') -> str:
+        if direction=='dst':
+            return_value = (str(self.dst).split('.'))[0]
+        elif direction=='src':
+            return_value = (str(self.src).split('.'))[0]
+        else:
+            return_value = 'get_ip_address() - error'
+        functions.error_trapping(['splitting hop address', return_value])
+        return return_value
+
     def show_all(self) -> json:
         temp_variable = {'hop':
                              {
@@ -65,7 +72,7 @@ class Hop:
                                  'dst': self.dst,
                                  'src': self.src,
                                  'sport': self.sport,
-                                 'protocol': self.protocal
+                                 'protocol': self.protocol
                              }
                          }
         print("This is all detail from a single hop - {}".format(temp_variable))
@@ -83,18 +90,24 @@ class HandleTraceroute:
         self.internal_address = ['192', '10', '172']
         self.a_pipper = '169'
         self.external_address = ''
-        self.hops = []
-        functions.error_trapping([self.internal_address, self.external_address, self.hops])
+        self.hops = [Hop.__init__()]
+        functions.error_trapping(['initiating trace object - ', self.internal_address, self.external_address, self.hops])
 
-    def strip_scapy_return(self, input_value: str) -> None:
-        """
-        This will strip the expected scapy traceroute return and fill a 'hop' object.
-        :param input_value: Str
-        :return: None
-        """
-        print("This is strip_scapy_return(): {}".format(input_value))
-        temp = input_value.strip()
-        print("Strip - {}".format(temp))
+    def get_internal_address(self) -> list:
+        return self.internal_address
+
+    def get_a_pipper(self) -> str:
+        return self.a_pipper
+
+    def set_external_address(self, value: str) -> None:
+        self.external_address = value
+
+    def get_external_address(self) -> str:
+        return self.external_address
+
+    def append_hops(self, value) -> None:
+        functions.error_trapping(['append_hops() - value', value])
+        self.hops.append(value)
 
     def is_external_address_empty(self) -> bool:
         if not self.external_address:
@@ -107,44 +120,6 @@ class HandleTraceroute:
             return False
         else:
             return True
-
-    def do_icmplib_traceroute(self, target='8.8.8.8') -> str:
-        functions.error_trapping([target, '** do_traceroute'])
-        list_hops, return_result = icmplib_function.icmplib_traceroute(target)
-        for l in list_hops:
-            self.hops.append(l)
-        return return_result
-
-    def split_string(self, temp) -> json:
-        temp_json = {
-            "id - " + temp[2][3:],
-            "ttl - " + temp[4][4:],
-            "protocol - " + temp[5][6:],
-            "dst - " + temp[6][4:],
-            "sport - " + temp[9][6:],
-            "src = " + temp[10],
-            "src 1= " + temp[11],
-            "src 2= " + temp[12],
-            "version " + temp[13][8],
-            "src 3= " + temp[14],
-            "src 4= " + temp[15],
-            "src 5= " + temp[16],
-            "src 6= " + temp[17]
-        }
-        # print("here: {}".format(temp_json))
-        return temp_json
-
-    def do_scapy_traceroute(self, target='8.8.8.8') -> str:
-        output_list = []
-        output_list = scapy_function.scapy_traceroute(target)
-
-        print("do_scrapy_traceroute() - output_list - {}".format(output_list))
-        for o in output_list:
-            temp = str(o).split(" ")
-            # print("the list: ".format(temp))
-            return_value = self.split_string(temp)
-            self.hops.append(return_value)
-        return str(self.hops)
 
     def __print_hops(self) -> None:
         for h in self.hops:
@@ -159,12 +134,6 @@ class HandleTraceroute:
     def __test_loop_return(self) -> json:
         return {'test': str([h for h in self.hops])}
 
-    def set_external_ip_address(self, input_value: str) -> None:
-        try:
-            host_machine.set_host_environment_variables(input_value)
-        except Exception as err:
-            print('Error: {}'.format(err))
-
 
     def check_hops_for_external_ip_and_return(self) -> str:
         for h in self.hops:
@@ -174,13 +143,13 @@ class HandleTraceroute:
             else:
                 pass
 
-    def get_external_ip_address(self) -> str:
-        self.external_address = host_machine.get_host_external_ip_address()
-        return self.external_address
 
-    def show_details(self) -> None:
-        everything = str(self.internal_address) + \
-            'The contents of self.external_address' + str(self.external_address) + \
-            'The contents of all the hops' + str(self.hops) + \
-            self.a_pipper
+    def show_details(self) -> json:
+        everything = {
+            'internal_addresses': self.internal_address,
+            'a_pipper ': self.a_pipper,
+            'external_address': self.external_address,
+            'hops': self.hops
+        }
         print('This is everything...{}'.format(everything))
+        return everything
