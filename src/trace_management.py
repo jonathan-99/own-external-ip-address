@@ -13,26 +13,13 @@ except ImportError as e:
     sys.exit("Importing error: " + str(e))
 
 
-def strip_scapy_return(input_value: str) -> None:
-    """
-    This will strip the expected scapy traceroute return and fill a 'hop' object.
-    :param input_value: Str
-    :return: None
-    """
-    print("This is strip_scapy_return(): {}".format(input_value))
-    temp = input_value.strip()
-    print("Strip - {}".format(temp))
-
-
-def do_icmplib_traceroute(self, target='8.8.8.8') -> str:
-    functions.error_trapping([target, '** do_traceroute'])
-    list_hops, return_result = icmplib_function.icmplib_traceroute(target)
-    for variable_l in list_hops:
-        self.hops.append(variable_l)
-    return return_result
-
-
 def split_string(temp) -> json:
+    """
+    This splits a string at a determined point, it assumes the items are in the correct place.
+    This should be made flexible.
+    :param temp:
+    :return:
+    """
     temp_json = {
         "id - " + temp[2][3:],
         "ttl - " + temp[4][4:],
@@ -48,16 +35,43 @@ def split_string(temp) -> json:
         "src 5= " + temp[16],
         "src 6= " + temp[17]
     }
-    # print("here: {}".format(temp_json))
     return temp_json
 
+def temp_function(temp_object: trace_class.HandleTraceroute):
+    print("This is the test - {}".format(temp_object.pop_hops()))
 
-def do_scapy_traceroute(target='8.8.8.8') -> list:
-    trace_object = trace_class.HandleTraceroute
-    output_list = scapy_function.scapy_traceroute(target)
+def adding_scapy_hop_returns_to_an_object(input_list: list, t_object: trace_class.HandleTraceroute) -> trace_class.HandleTraceroute:
+    """
+    Getting data out of the input list (list of hops json items), placing into a Hop object and return object.
+    :param input_list: list
+    :param t_object: trace_class.HandleTraceroute
+    :return: t_object as yet unused
+    """
+    for o in input_list:
+        # print("This is o of output_list: {} - {} - {}".format(o, o['dst'], o['src']))
+        a = (t_object.Hop())
+        a.add_dst(o['dst'])
+        a.add_hop_id(o['id'])
+        a.add_protocol(o['protocol'])
+        a.add_ip_version(o['version'])
+        a.add_src(o['src'])
+        a.add_ttl(o['ttl'])
+        # functions.error_trapping(['appending_hops', a, ' - ', trace_object.Hop().show_all()])
+        t_object.append_hops(a)
+
     #
     # Need to place return into object and return the object.
     #
+    # print("This will replace output_list: {} - {}".format('trace_object', trace_object.temp_hops.show_all()))
+    return t_object
+
+
+def do_scapy_traceroute(target='8.8.8.8') -> list:
+    trace_object = trace_class.HandleTraceroute()
+    output_list = scapy_function.scapy_traceroute(target)
+    trace_object = adding_scapy_hop_returns_to_an_object(output_list, trace_object)
+    temp_function(trace_object)
+    print(" ** Okay ** {}".format(trace_object.temp_hops.show_all()))
     return output_list
 
 
@@ -71,3 +85,16 @@ def set_external_ip_address(input_value: str) -> None:
 def get_external_ip_address(self) -> str:
     self.external_address = host_machine.get_host_external_ip_address()
     return self.external_address
+
+def do_icmplib_traceroute(self, target='8.8.8.8') -> str:
+    """
+    This is an alternate to scrapy traceroute library, as yet not functional.
+    :param self:
+    :param target:
+    :return:
+    """
+    functions.error_trapping([target, '** do_traceroute'])
+    list_hops, return_result = icmplib_function.icmplib_traceroute(target)
+    for variable_l in list_hops:
+        self.hops.append(variable_l)
+    return return_result
