@@ -8,6 +8,7 @@ try:
 except ImportError as e:
     sys.exit("Importing error: " + str(e))
 
+
 class Hop:
     """
     This is a sub_class of the traceroute to handle the details of each hop.
@@ -18,7 +19,10 @@ class Hop:
     answer=<IP  version=4 ihl=5 tos=0xc0 len=56 id=25889 flags= frag=0 ttl=64 proto=icmp
     chksum=0x9124 src=192.168.1.1 dst=192.168.1.110 |
     <ICMP  type=time-exceeded code=ttl-zero-during-transit chksum=0xb931 reserved=0 length=0 unused=0 |
-    <IPerror  version=4 ihl=5 tos=0x0 len=28 id=23970 flags= frag=0 ttl=1 proto=udp chksum=0x9817 src=192.168.1.110 dst=1.1.1.1 |
+    <IPerror
+        version=4 ihl=5 tos=0x0 len=28 id=23970 flags=
+        frag=0 ttl=1 proto=udp chksum=0x9817
+        src=192.168.1.110 dst=1.1.1.1 |
     <UDPerror  sport=15930 dport=domain len=8 chksum=0xfd56
     |
     >>>>)
@@ -55,9 +59,9 @@ class Hop:
         self.src = str(value)
 
     def get_ip_address(self, direction='dst') -> str:
-        if direction=='dst':
+        if direction == 'dst':
             return_value = (str(self.dst).split('.'))[0]
-        elif direction=='src':
+        elif direction == 'src':
             return_value = (str(self.src).split('.'))[0]
         else:
             return_value = 'get_ip_address() - error'
@@ -66,15 +70,14 @@ class Hop:
 
     def show_all(self) -> json:
         temp_variable = {'hop':
-                             {
-                                 'hop id': self.hop_id,
-                                 'ip version': self.ip_version,
-                                 'dst': self.dst,
-                                 'src': self.src,
-                                 'sport': self.sport,
-                                 'protocol': self.protocol
-                             }
-                         }
+                         {
+                             'hop id': self.hop_id,
+                             'ip version': self.ip_version,
+                             'dst': self.dst,
+                             'src': self.src,
+                             'sport': self.sport,
+                             'protocol': self.protocol
+                         }}
         print("This is all detail from a single hop - {}".format(temp_variable))
         return temp_variable
 
@@ -83,7 +86,7 @@ class HandleTraceroute:
     """
     This class file periodically checks, your home ip address and sets it as a
     machine ip address to be called for a vpn service.
-    Default time = 30 mins
+    Default time = 30 minutes
     """
 
     def __init__(self):
@@ -91,7 +94,8 @@ class HandleTraceroute:
         self.a_pipper = '169'
         self.external_address = ''
         self.hops = [Hop.__init__()]
-        functions.error_trapping(['initiating trace object - ', self.internal_address, self.external_address, self.hops])
+        functions.error_trapping(
+            ['initiating trace object - ', self.internal_address, self.external_address, self.hops])
 
     def get_internal_address(self) -> list:
         return self.internal_address
@@ -134,15 +138,14 @@ class HandleTraceroute:
     def __test_loop_return(self) -> json:
         return {'test': str([h for h in self.hops])}
 
-
     def check_hops_for_external_ip_and_return(self) -> str:
         for h in self.hops:
             if self.internal_address == h:
-                self.external_address = h
-                return self.external_address
+                self.external_address = str(h)
+                temp_variable = str(h).split('.')[0]
+                return temp_variable
             else:
                 pass
-
 
     def show_details(self) -> json:
         everything = {
