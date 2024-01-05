@@ -37,6 +37,23 @@ def split_string(temp) -> json:
     }
     return temp_json
 
+def search_for_first_external_hop(input_src: str, trace_object: trace_class.HandleTraceroute, check: bool):
+    returning_variable = str(input_src)
+    input_variable_test = str(input_src).split('.')[0]
+    validation_variable = trace_object.get_external_address()
+    if check == False:
+        if input_variable_test in validation_variable:
+            # this means it is an internal ip address
+            return "", False  # this needs to be refined -> what to do
+        else:
+            # this means it is an external ip address
+            print("search_for_first_external_hop() - {} - input_variable_test{} - check {}".format(returning_variable,
+                                                                                        input_variable_test, check))
+            return returning_variable, True
+    else:
+        return "", True
+
+
 def temp_function(temp_object: trace_class.HandleTraceroute):
     print("This is the test - {}".format(temp_object.pop_hops()))
 
@@ -47,6 +64,7 @@ def adding_scapy_hop_returns_to_an_object(input_list: list, t_object: trace_clas
     :param t_object: trace_class.HandleTraceroute
     :return: t_object as yet unused
     """
+    stop_repeating_check = False
     for o in input_list:
         # print("This is o of output_list: {} - {} - {}".format(o, o['dst'], o['src']))
         a = (t_object.Hop())
@@ -56,9 +74,16 @@ def adding_scapy_hop_returns_to_an_object(input_list: list, t_object: trace_clas
         a.add_ip_version(o['version'])
         a.add_src(o['src'])
         a.add_ttl(o['ttl'])
-        # functions.error_trapping(['appending_hops', a, ' - ', trace_object.Hop().show_all()])
+        functions.error_trapping(['appending_hops', a, ' - ', t_object.Hop().show_all()])
+        external_ip_find, stop_repeating_check = search_for_first_external_hop(a.src, t_object, stop_repeating_check)
         t_object.append_hops(a)
 
+    if not external_ip_find:
+        # set this variable as external ip on host environment - if changed.
+        host_object = host_machine
+        host_object.set_host_environment_variables(external_ip_find)
+    else:
+        print("There was an issue finding the external ip address.")
     #
     # Need to place return into object and return the object.
     #
@@ -70,7 +95,6 @@ def do_scapy_traceroute(target='8.8.8.8') -> list:
     trace_object = trace_class.HandleTraceroute()
     output_list = scapy_function.scapy_traceroute(target)
     trace_object = adding_scapy_hop_returns_to_an_object(output_list, trace_object)
-    temp_function(trace_object)
     print(" ** Okay ** {}".format(trace_object.temp_hops.show_all()))
     return output_list
 

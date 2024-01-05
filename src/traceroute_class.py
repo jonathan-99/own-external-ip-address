@@ -112,7 +112,7 @@ class HandleTraceroute:
         return self.external_address
 
     def append_hops(self, value: Hop) -> None:
-        functions.error_trapping(['append_hops() -', str(value.dst), ' - src', str(value.src)])
+        # functions.error_trapping(['append_hops() -', str(value.dst), ' - src', str(value.src)])
         self.hops.append(value)
 
     def pop_hops(self) -> json:
