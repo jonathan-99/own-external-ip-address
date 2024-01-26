@@ -11,80 +11,26 @@ try:
     import json
     import os
     import src.host_machine_class
+    import src.hop_class as hop
+    import src.traceroute_class as trace
+    import logging
 except ImportError as e:
-    sys.exit("Importing error: " + str(e))
+    logging.error("Importing error: " + str(e))
+    sys.exit()
+except Exception as err:
+    logging.error(f"This is a wider error catch - {err}")
 
 
-def answer(temp: list) -> json:
-    temp_json = {
-        "id": temp[7][3:],
-        "ttl": temp[10][4:],
-        "protocol": temp[11][6:],
-        "dst": temp[14][4:],
-        "src": temp[13][4:],
-        "version": temp[3][8]
-    }
-    return temp_json
-
-
-def re_order_hops(input_list: list) -> list:
-    """
-    Some hops are recorded in random orders: desired outcome - >
-     - dst, id, protocol, version, src, ttl
-    :param input_list:
-    :return:
-    """
-    temp_dst = ''
-    temp_id = ''
-    temp_protocol = ''
-    temp_version = ''
-    temp_src = ''
-    temp_ttl = ''
-    output_list = []
-    index_variable = 0
-
-    for i in input_list:
-        temp_dst = i['dst']
-        temp_id = i['id']
-        temp_protocol = i['protocol']
-        temp_version = i['version']
-        temp_src = i['src']
-        temp_ttl = i['ttl']
-        output_list.append(
-            {
-                'dst': temp_dst,
-                'id': temp_id,
-                'protocol': temp_protocol,
-                'version': temp_version,
-                'src': temp_src,
-                'ttl': temp_ttl
-            }
-        )
-        index_variable += 1
-    # print("re_order_hops() - {}".format(output_list))
-
-    # needs to return a json
-    return output_list
-
-
-def scapy_traceroute(target='1.1.1.1') -> list:
-    return_list = []
+def scapy_traceroute(target='1.1.1.1'):  # tbd
     dns_variable = '/DNS(qd=DNSQR(qname="www.google.com"))'
     result, unans = traceroute(target, nofilter=1, l4=UDP(sport=RandShort()))
+    trace_object = trace.HandleTraceroute()
     for r in result:
-        temp = str(r).split(',')
-        t = str(temp[1]).split(' ')  # this makes it a list
-        return_json = answer(t)
-        #  returns this ... {'protocol - icmp',
-        #  'id - 13061',
-        #  'version 4',
-        #  'src = 192.168.1.1',
-        #  'ttl - 64',
-        #  'dst - 192.168.1.110'}
-        return_list.append(return_json)
-    return_list = re_order_hops(return_list)  # std return can randomise the order.
-    return return_list
+        print(f"(R)esult type {type(r)} - {r}")
+        trace_object.process_traceroute_return(str(r))
+        trace_object.show_details()
+    return  # tbd
 
 
 if __name__ == '__main__':
-    scapy_traceroute()
+    logging.debug(str(scapy_traceroute("1.1.1.1")))

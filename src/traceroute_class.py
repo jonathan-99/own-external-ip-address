@@ -5,8 +5,12 @@ try:
     import sys
     import json
     import os
+    import logging
+    import src.hop_class as hop
+    import xml.etree.ElementTree as ET
+    import xml
 except ImportError as e:
-    sys.exit("Importing error: " + str(e))
+    logging.error("Importing error: " + str(e))
 
 
 class HandleTraceroute:
@@ -14,90 +18,72 @@ class HandleTraceroute:
     This class file holds the framework of a traceroute return. The sub_class is a number of "Hop" objects.
     """
 
-    class Hop:
-        """
-        This is a sub_class of the traceroute to handle the details of each hop.
-        Sample scapy return that needs to be handled.
-        QueryAnswer
-        (query=<IP  id=23970 frag=0 ttl=1 proto=udp dst=1.1.1.1 |
-        UDP  sport=15930 |>>,
-        answer=<IP  version=4 ihl=5 tos=0xc0 len=56 id=25889 flags= frag=0 ttl=64 proto=icmp
-        chksum=0x9124 src=192.168.1.1 dst=192.168.1.110 |
-        ICMP  type=time-exceeded code=ttl-zero-during-transit chksum=0xb931 reserved=0 length=0 unused=0 |
-        IPerror
-            version=4 ihl=5 tos=0x0 len=28 id=23970 flags=
-            frag=0 ttl=1 proto=udp chksum=0x9817
-            src=192.168.1.110 dst=1.1.1.1 |
-        UDPerror  sport=15930 dport=domain len=8 chksum=0xfd56
-        """
-
-        def __init__(self):
-            self.hop_id = ""
-            self.sport = ""
-            self.dst = ""
-            self.ip_version = ""
-            self.ttl = ""
-            self.protocol = ""
-            self.src = ""
-
-        def add_hop_id(self, value) -> None:
-            self.hop_id = str(value)
-
-        def add_sport(self, value) -> None:
-            self.sport = str(value)
-
-        def add_dst(self, value) -> None:
-            self.dst = str(value)
-
-        def add_ip_version(self, value) -> None:
-            self.ip_version = str(value)
-
-        def add_ttl(self, value) -> None:
-            self.ttl = str(value)
-
-        def add_protocol(self, value) -> None:
-            self.protocol = str(value)
-
-        def add_src(self, value) -> None:
-            self.src = str(value)
-
-        def get_ip_address(self, direction='dst') -> str:
-            if direction == 'dst':
-                return_value = (str(self.dst).split('.'))[0]
-            elif direction == 'src':
-                return_value = (str(self.src).split('.'))[0]
-            else:
-                return_value = 'get_ip_address() - error'
-            functions.error_trapping(['splitting hop address', return_value])
-            return return_value
-
-        def get_hops_object(self):
-            return self
-
-        def show_all(self) -> json:
-            return {'hop':
-                    {
-                        'hop id': self.hop_id,
-                        'ip version': self.ip_version,
-                        'dst': self.dst,
-                        'src': self.src,
-                        'sport': self.sport,
-                        'protocol': self.protocol
-                    }}
-
     def __init__(self):
         self.internal_address = ['192', '10', '172']
         self.a_pipper = '169'
         self.external_address = ''
         # this needs a number of hop instances - not sure correct methodology
         # 1
-        self.hops = [self.Hop()]
-        # 2
-        self.temp_hops = HandleTraceroute.Hop()
-        self.a_number_of_hops = [self.temp_hops]
-        # functions.error_trapping(
-        #    ['initiating trace object - ', self.internal_address, self.external_address, self.hops
-        #    ])
+        self.hops = [hop.Hop]
+
+    def reformat_xml(self, input_code: str) -> xml:
+        ip_attributes = ["id", "frag", "ttl", "proto", "dst"]
+        udp_attributes = ["sport"]
+        answer_attribute =['ip', 'version', 'id', 'flags', 'ttl', 'proto', 'src', 'dst']
+        icmp_attribute = ['type', 'code', 'chksum', 'reserved', 'length', 'unused']
+        ip_error_attribute = ['version', 'ihl', 'tos', 'len', 'id', 'flags', 'frag', 'ttl', 'proto', 'chksum', 'src', 'dst']
+        udp_error_attribite = ['sport', 'dport', 'len', 'chksum']
+
+        # need to extract the other attributes which are embedded. the top level "query" is done, now all within answer
+
+        # Split the input into relevant parts
+        udp_start = input_code.find("|<UDP")
+        udp_end = input_code.find(">", udp_start) + 1
+
+        # Split the input into relevant parts
+        ip_part = input_code[:udp_start]
+        udp_part = input_code[udp_start:udp_end]
+
+        # Extract attributes for <IP>
+        ip_attributes_dict = {}
+        for item in ip_part.split(" ")[1:]:
+            if "=" in item:
+                attr, value = item.strip().split("=")
+                ip_attributes_dict[attr] = value.strip()
+
+        # Extract attributes for <UDP>
+        udp_attributes_dict = {}
+        for item in udp_part.split(" ")[1:]:
+            if "=" in item:
+                attr, value = item.strip().split("=")
+                udp_attributes_dict[attr] = value.strip()
+
+        # Create an XML structure
+        root = ET.Element("QueryAnswer")
+
+        ip_element = ET.SubElement(root, "IP", ip_attributes_dict)
+        udp_element = ET.SubElement(ip_element, "UDP", udp_attributes_dict)
+        xml_string = ET.tostring(root, encoding="unicode", method="xml")
+        print(f"this is the xml - {xml_string}")
+
+        return xml_string
+
+    def translate_string_into_xml(self, input_code: str):
+        result_string = input_code[input_code.find('=') + 1:]
+        print(f"result_string() - {result_string}")
+        new_xml = self.reformat_xml(result_string)
+        print(f"translate xml - {new_xml}")
+
+    def process_traceroute_return(self, return_code: str) -> None:  # this needs to return a trace object
+        logging.debug("process_traceroute_return()")
+        self.translate_string_into_xml(return_code)
+        hop_object = hop.Hop()
+        for element in return_code.split('|'):
+            print(f"this is the line - {type(element)} - {element}")
+            hop_object.fill_single_hope_line_into_object(element)
+            self.hops.append(hop_object)
+        print(f"This is process_traceroute_return() {self.show_details()}")
+        return
 
     def get_internal_address(self) -> list:
         return self.internal_address
@@ -111,7 +97,7 @@ class HandleTraceroute:
     def get_external_address(self) -> str:
         return self.external_address
 
-    def append_hops(self, value: Hop) -> None:
+    def append_hops(self, value: hop) -> None:
         # functions.error_trapping(['append_hops() -', str(value.dst), ' - src', str(value.src)])
         self.hops.append(value)
 
