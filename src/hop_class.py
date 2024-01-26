@@ -40,7 +40,7 @@ class Hop:
         logging.debug(f"fill_single_hop_line_into_object()")
         if 'QueryAnswer' in line:
             l = line.split(' ')
-            print(f"l here is {l} - {l['id=']}")
+            # print(f"l here is {l} - {l['id=']}")
             self.add_hop_id(l['id='])  # Replace with actual hop ID
             self.add_sport('sport=')  # Replace with actual sport
             self.add_dst('dst=')  # Replace with actual destination

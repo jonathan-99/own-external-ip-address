@@ -32,17 +32,23 @@ class HandleTraceroute:
         answer_attribute =['ip', 'version', 'id', 'flags', 'ttl', 'proto', 'src', 'dst']
         icmp_attribute = ['type', 'code', 'chksum', 'reserved', 'length', 'unused']
         ip_error_attribute = ['version', 'ihl', 'tos', 'len', 'id', 'flags', 'frag', 'ttl', 'proto', 'chksum', 'src', 'dst']
-        udp_error_attribite = ['sport', 'dport', 'len', 'chksum']
+        udp_error_attribute = ['sport', 'dport', 'len', 'chksum']
 
         # need to extract the other attributes which are embedded. the top level "query" is done, now all within answer
 
         # Split the input into relevant parts
         udp_start = input_code.find("|<UDP")
+        icmp_start = input_code.find("|<ICMP")
+        IPerror_start = input_code.find("|IPerror")
+        UDPerror_start = input_code.find("UDPerror")
+        the_end = input_code.find("|>>>")
         udp_end = input_code.find(">", udp_start) + 1
 
         # Split the input into relevant parts
         ip_part = input_code[:udp_start]
         udp_part = input_code[udp_start:udp_end]
+        icmp_part = input_code[icmp_start:IPerror_start - 2]
+        UDPerror_part = input_code[UDPerror_start:the_end - 2]
 
         # Extract attributes for <IP>
         ip_attributes_dict = {}
@@ -58,6 +64,20 @@ class HandleTraceroute:
                 attr, value = item.strip().split("=")
                 udp_attributes_dict[attr] = value.strip()
 
+        # Extract attributes for <ICMP>
+        icmp_attributes_dict = {}
+        for item in icmp_part.split(" ")[1:]:
+            if "=" in item:
+                attr, value = item.strip().split("=")
+                icmp_attributes_dict[attr] = value.strip()
+
+        # Extract attributes for <UDPerror>
+        UDPerror_attributes_dict = {}
+        for item in UDPerror_part.split(" ")[1:]:
+            if "=" in item:
+                attr, value = item.strip().split("=")
+                UDPerror_attributes_dict[attr] = value.strip()
+
         # Create an XML structure
         root = ET.Element("QueryAnswer")
 
@@ -70,9 +90,7 @@ class HandleTraceroute:
 
     def translate_string_into_xml(self, input_code: str):
         result_string = input_code[input_code.find('=') + 1:]
-        print(f"result_string() - {result_string}")
         new_xml = self.reformat_xml(result_string)
-        print(f"translate xml - {new_xml}")
 
     def process_traceroute_return(self, return_code: str) -> None:  # this needs to return a trace object
         logging.debug("process_traceroute_return()")

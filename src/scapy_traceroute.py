@@ -24,6 +24,7 @@ except Exception as err:
 def scapy_traceroute(target='1.1.1.1'):  # tbd
     dns_variable = '/DNS(qd=DNSQR(qname="www.google.com"))'
     result, unans = traceroute(target, nofilter=1, l4=UDP(sport=RandShort()))
+    print(f"uname - {type(unans)} - {unans}")
     trace_object = trace.HandleTraceroute()
     for r in result:
         print(f"(R)esult type {type(r)} - {r}")
