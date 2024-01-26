@@ -94,6 +94,7 @@ def adding_scapy_hop_returns_to_an_object(input_list: list, t_object: trace_clas
 def do_scapy_traceroute(target='8.8.8.8') -> list:
     trace_object = trace_class.HandleTraceroute()
     output_list = scapy_function.scapy_traceroute(target)
+    print(f"just give me tis: {output_list}")
     trace_object = adding_scapy_hop_returns_to_an_object(output_list, trace_object)
     print(" ** Okay ** {}".format(trace_object.temp_hops.show_all()))
     return output_list
@@ -122,3 +123,6 @@ def do_icmplib_traceroute(self, target='8.8.8.8') -> str:
     for variable_l in list_hops:
         self.hops.append(variable_l)
     return return_result
+
+if __name__ == '__main__':
+    print("We are here: ".format(do_scapy_traceroute(target='8.8.8.8')))
