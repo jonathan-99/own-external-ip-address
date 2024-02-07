@@ -24,7 +24,13 @@ class HandleTraceroute:
         self.external_address = ''
         # this needs a number of hop instances - not sure correct methodology
         # 1
-        self.hops = [hop.Hop]
+        self.hops = []
+
+    def is_empty(self) -> bool:
+        if (not self.hops):
+            return True
+        else:
+            return False
 
     def reformat_xml(self, input_code: str) -> xml:
         ip_attributes = ["id", "frag", "ttl", "proto", "dst"]
@@ -115,9 +121,18 @@ class HandleTraceroute:
     def get_external_address(self) -> str:
         return self.external_address
 
-    def append_hops(self, value: hop) -> None:
-        # functions.error_trapping(['append_hops() -', str(value.dst), ' - src', str(value.src)])
-        self.hops.append(value)
+    def append_hops(self, number: int, value: dict) -> None:
+        logging.debug(f'append_hops() - {number} - {value}')
+        input_data = {
+            "Hop Number": number,
+            "Hop Info": {
+                'src': value['src'],
+                'dst': value['dst'],
+                'ttl': value['ttl'],
+                'proto': value['proto']
+            }
+        }
+        self.hops.append(input_data)
 
     def pop_hops(self) -> json:
         print("appending pop_hops() - {} - {}".format(self.hops.count, self.hops.pop()))
@@ -159,3 +174,17 @@ class HandleTraceroute:
         }
         print('This is everything...{}'.format(everything))
         return everything
+
+    def return_first_external_hop(self) -> str:
+        for a in self.hops:
+            logging.debug(f'return_first_external_hop {a}')
+            print(f'Hop by hop {a}')
+            temp = a['Hop Info']['src'].split('.')
+            print(f'temp - {temp}')
+            #  Hop by hop {'Hop Number': 2, 'Hop Info': {'src': '192.168.83.251', 'dst': '10.7.5.67', 'ttl': 63, 'proto': 1}} - {'Hop Number': 2, 'Hop Info': {'src': '192.168.83.251', 'dst': '10.7.5.67', 'ttl': 63, 'proto': 1}}
+            if a in self.internal_address:
+                pass
+            else:
+                self.set_external_address(a)
+                logging.debug(f'We have matched an external ip address :{a}')
+        return self.get_external_address()
