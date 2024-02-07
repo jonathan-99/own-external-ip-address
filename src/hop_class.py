@@ -3,10 +3,13 @@
 try:
     import src.functions as functions
     import sys
-    import json
     import os
+    import json
     import logging
 except ImportError as e:
+    import json
+    import logging
+    import src.functions as functions
     logging.error("Importing error: " + str(e))
 
 
@@ -36,18 +39,18 @@ class Hop:
         self.protocol = ""
         self.src = ""
 
-    def fill_single_hope_line_into_object(self, line):
+    def fill_single_hope_line_into_object(self, input_line):
         logging.debug(f"fill_single_hop_line_into_object()")
-        if 'QueryAnswer' in line:
-            l = line.split(' ')
+        if 'QueryAnswer' in input_line:
+            line = input_line.split(' ')
             # print(f"l here is {l} - {l['id=']}")
-            self.add_hop_id(l['id='])  # Replace with actual hop ID
-            self.add_sport('sport=')  # Replace with actual sport
-            self.add_dst('dst=')  # Replace with actual destination
-            self.add_ip_version('version=')  # Replace with actual IP version
-            self.add_ttl('ttl=')  # Replace with actual TTL
-            self.add_protocol('proto=')  # Replace with actual protocol
-            self.add_src('src=')  # Replace with actual source
+            self.add_hop_id(line['id='])  # Replace with actual hop ID
+            self.add_sport(line['sport='])  # Replace with actual sport
+            self.add_dst(line['dst='])  # Replace with actual destination
+            self.add_ip_version(line['version='])  # Replace with actual IP version
+            self.add_ttl(line['ttl='])  # Replace with actual TTL
+            self.add_protocol(line['proto='])  # Replace with actual protocol
+            self.add_src(line['src='])  # Replace with actual source
         print(f" show all hop - {self.show_all()}")
         return self
 

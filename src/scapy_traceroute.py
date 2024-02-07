@@ -15,19 +15,21 @@ try:
     import src.traceroute_class as trace
     import logging
 except ImportError as e:
-    logging.error("Importing error: " + str(e))
+    import logging
+    logging.error("Importing error: (scapy_traceroute.py)" + str(e))
     sys.exit()
 except Exception as err:
+    import logging
     logging.error(f"This is a wider error catch - {err}")
 
 
 def scapy_traceroute(target='1.1.1.1'):  # tbd
-    dns_variable = '/DNS(qd=DNSQR(qname="www.google.com"))'
+    # dns_variable = '/DNS(qd=DNSQR(qname="www.google.com"))'
     result, unans = traceroute(target, nofilter=1, l4=UDP(sport=RandShort()))
     print(f"uname - {type(unans)} - {unans}")
     trace_object = trace.HandleTraceroute()
     for r in result:
-        print(f"(R)esult type {type(r)} - {r}")
+        print(f"Result r type {type(r)} - {r}")
         trace_object.process_traceroute_return(str(r))
         trace_object.show_details()
     return  # tbd
