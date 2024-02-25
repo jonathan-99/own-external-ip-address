@@ -3,14 +3,17 @@
 try:
     import src.functions as functions
     import sys
-    import json
     import os
-    import logging
-    import src.hop_class as hop
-    import xml.etree.ElementTree as ET
     import xml
+    import json
+    import src.hop_class as hop
+    import xml.etree.ElementTree as EleTree
+    import logging
 except ImportError as e:
-    logging.error("Importing error: " + str(e))
+    import json
+    import logging
+    import xml
+    logging.error("Importing error: traceroute_class.py" + str(e))
 
 
 class HandleTraceroute:
@@ -20,18 +23,26 @@ class HandleTraceroute:
 
     def __init__(self):
         self.internal_address = ['192', '10', '172']
+        self.loopback_address = '169'
+        self.multicast = '224'
+        self.future_use = '240'
         self.a_pipper = '169'
         self.external_address = ''
-        # this needs a number of hop instances - not sure correct methodology
-        # 1
-        self.hops = [hop.Hop]
+        self.hops = []
+
+    def is_empty(self) -> bool:
+        if not self.hops:
+            return True
+        else:
+            return False
 
     def reformat_xml(self, input_code: str) -> xml:
         ip_attributes = ["id", "frag", "ttl", "proto", "dst"]
         udp_attributes = ["sport"]
-        answer_attribute =['ip', 'version', 'id', 'flags', 'ttl', 'proto', 'src', 'dst']
+        answer_attribute = ['ip', 'version', 'id', 'flags', 'ttl', 'proto', 'src', 'dst']
         icmp_attribute = ['type', 'code', 'chksum', 'reserved', 'length', 'unused']
-        ip_error_attribute = ['version', 'ihl', 'tos', 'len', 'id', 'flags', 'frag', 'ttl', 'proto', 'chksum', 'src', 'dst']
+        ip_error_attribute = ['version', 'ihl', 'tos', 'len', 'id', 'flags', 'frag', 'ttl',
+                              'proto', 'chksum', 'src', 'dst']
         udp_error_attribute = ['sport', 'dport', 'len', 'chksum']
 
         # need to extract the other attributes which are embedded. the top level "query" is done, now all within answer
@@ -39,16 +50,16 @@ class HandleTraceroute:
         # Split the input into relevant parts
         udp_start = input_code.find("|<UDP")
         icmp_start = input_code.find("|<ICMP")
-        IPerror_start = input_code.find("|IPerror")
-        UDPerror_start = input_code.find("UDPerror")
+        iperror_start = input_code.find("|IPerror")
+        udperror_start = input_code.find("UDPerror")
         the_end = input_code.find("|>>>")
         udp_end = input_code.find(">", udp_start) + 1
 
         # Split the input into relevant parts
         ip_part = input_code[:udp_start]
         udp_part = input_code[udp_start:udp_end]
-        icmp_part = input_code[icmp_start:IPerror_start - 2]
-        UDPerror_part = input_code[UDPerror_start:the_end - 2]
+        icmp_part = input_code[icmp_start:iperror_start - 2]
+        udperror_part = input_code[udperror_start:the_end - 2]
 
         # Extract attributes for <IP>
         ip_attributes_dict = {}
@@ -72,18 +83,18 @@ class HandleTraceroute:
                 icmp_attributes_dict[attr] = value.strip()
 
         # Extract attributes for <UDPerror>
-        UDPerror_attributes_dict = {}
-        for item in UDPerror_part.split(" ")[1:]:
+        udperror_attributes_dict = {}
+        for item in udperror_part.split(" ")[1:]:
             if "=" in item:
                 attr, value = item.strip().split("=")
-                UDPerror_attributes_dict[attr] = value.strip()
+                udperror_attributes_dict[attr] = value.strip()
 
         # Create an XML structure
-        root = ET.Element("QueryAnswer")
+        root = EleTree.Element("QueryAnswer")
 
-        ip_element = ET.SubElement(root, "IP", ip_attributes_dict)
-        udp_element = ET.SubElement(ip_element, "UDP", udp_attributes_dict)
-        xml_string = ET.tostring(root, encoding="unicode", method="xml")
+        ip_element = EleTree.SubElement(root, "IP", ip_attributes_dict)
+        udp_element = EleTree.SubElement(ip_element, "UDP", udp_attributes_dict)
+        xml_string = EleTree.tostring(root, encoding="unicode", method="xml")
         print(f"this is the xml - {xml_string}")
 
         return xml_string
@@ -115,9 +126,18 @@ class HandleTraceroute:
     def get_external_address(self) -> str:
         return self.external_address
 
-    def append_hops(self, value: hop) -> None:
-        # functions.error_trapping(['append_hops() -', str(value.dst), ' - src', str(value.src)])
-        self.hops.append(value)
+    def append_hops(self, number: int, value: dict) -> None:
+        logging.debug(f'append_hops() - {number} - {value}')
+        input_data = {
+            "Hop Number": number,
+            "Hop Info": {
+                'src': value['src'],
+                'dst': value['dst'],
+                'ttl': value['ttl'],
+                'proto': value['proto']
+            }
+        }
+        self.hops.append(input_data)
 
     def pop_hops(self) -> json:
         print("appending pop_hops() - {} - {}".format(self.hops.count, self.hops.pop()))
@@ -136,7 +156,7 @@ class HandleTraceroute:
             return True
 
     def get_hops(self) -> json:
-        return {'hops': self.a_number_of_hops}
+        return {'hops': self.hops}
 
     def __test_loop_return(self) -> json:
         return {'test': str([h for h in self.hops])}
@@ -159,3 +179,33 @@ class HandleTraceroute:
         }
         print('This is everything...{}'.format(everything))
         return everything
+
+    def return_first_external_hop(self) -> str:
+        for a in self.hops:
+            logging.debug(f'return_first_external_hop {a}')
+            print(f'Hop by hop {a}')
+            temp = a['Hop Info']['src'].split('.')
+            print(f'temp - {temp}')
+            #  Hop by hop {
+            #  'Hop Number': 2,
+            #  'Hop Info': {
+            #       'src': '192.168.83.251',
+            #       'dst': '10.7.5.67',
+            #       'ttl': 63,
+            #       'proto': 1
+            #  }
+            # } - {
+            #   'Hop Number': 2,
+            #   'Hop Info': {
+            #       'src': '192.168.83.251',
+            #       'dst': '10.7.5.67',
+            #       'ttl': 63,
+            #       'proto': 1
+            #   }
+            # }
+            if a in self.internal_address:
+                pass
+            else:
+                self.set_external_address(a)
+                logging.debug(f'We have matched an external ip address :{a}')
+        return self.get_external_address()

@@ -1,0 +1,91 @@
+Sending ICMP packet for Hop 1
+Begin emission:
+Finished sending 1 packets.
+
+Received 4 packets, got 1 answers, remaining 0 packets
+Received response for Hop 1
+Hop 1 Information: {'src': '10.7.5.2', 'dst': '10.7.5.67', 'ttl': 64, 'proto': 1}
+Sending ICMP packet for Hop 2
+Begin emission:
+Finished sending 1 packets.
+
+Received 2 packets, got 1 answers, remaining 0 packets
+Received response for Hop 2
+Hop 2 Information: {'src': '192.168.83.251', 'dst': '10.7.5.67', 'ttl': 63, 'proto': 1}
+Sending ICMP packet for Hop 3
+Begin emission:
+Finished sending 1 packets.
+
+Received 2 packets, got 1 answers, remaining 0 packets
+Received response for Hop 3
+Hop 3 Information: {'src': '185.220.15.1', 'dst': '10.7.5.67', 'ttl': 62, 'proto': 1}
+Sending ICMP packet for Hop 4
+Begin emission:
+Finished sending 1 packets.
+
+Received 2 packets, got 1 answers, remaining 0 packets
+Received response for Hop 4
+Hop 4 Information: {'src': '172.30.1.145', 'dst': '10.7.5.67', 'ttl': 241, 'proto': 1}
+Sending ICMP packet for Hop 5
+Begin emission:
+Finished sending 1 packets.
+
+Received 2 packets, got 1 answers, remaining 0 packets
+Received response for Hop 5
+Hop 5 Information: {'src': '172.30.1.228', 'dst': '10.7.5.67', 'ttl': 242, 'proto': 1}
+Sending ICMP packet for Hop 6
+Begin emission:
+Finished sending 1 packets.
+
+Received 2 packets, got 1 answers, remaining 0 packets
+Received response for Hop 6
+Hop 6 Information: {'src': '172.30.1.226', 'dst': '10.7.5.67', 'ttl': 53, 'proto': 1}
+Sending ICMP packet for Hop 7
+Begin emission:
+Finished sending 1 packets.
+
+Received 2 packets, got 1 answers, remaining 0 packets
+Received response for Hop 7
+Hop 7 Information: {'src': '172.30.1.102', 'dst': '10.7.5.67', 'ttl': 244, 'proto': 1}
+Sending ICMP packet for Hop 8
+Begin emission:
+Finished sending 1 packets.
+
+Received 2 packets, got 1 answers, remaining 0 packets
+Received response for Hop 8
+Hop 8 Information: {'src': '172.30.1.59', 'dst': '10.7.5.67', 'ttl': 245, 'proto': 1}
+Sending ICMP packet for Hop 9
+Begin emission:
+Finished sending 1 packets.
+
+Received 14 packets, got 0 answers, remaining 1 packets
+No response for Hop 9.
+Sending ICMP packet for Hop 10
+Begin emission:
+Finished sending 1 packets.
+
+Received 2 packets, got 1 answers, remaining 0 packets
+Received response for Hop 10
+Hop 10 Information: {'src': '142.250.170.82', 'dst': '10.7.5.67', 'ttl': 54, 'proto': 1}
+Sending ICMP packet for Hop 11
+Begin emission:
+Finished sending 1 packets.
+
+Received 2 packets, got 1 answers, remaining 0 packets
+Received response for Hop 11
+Hop 11 Information: {'src': '209.85.255.77', 'dst': '10.7.5.67', 'ttl': 54, 'proto': 1}
+Sending ICMP packet for Hop 12
+Begin emission:
+Finished sending 1 packets.
+
+Received 2 packets, got 1 answers, remaining 0 packets
+Received response for Hop 12
+Hop 12 Information: {'src': '216.239.41.241', 'dst': '10.7.5.67', 'ttl': 54, 'proto': 1}
+Sending ICMP packet for Hop 13
+Begin emission:
+Finished sending 1 packets.
+
+Received 2 packets, got 1 answers, remaining 0 packets
+Received response for Hop 13
+Hop 13 Information: {'src': '8.8.8.8', 'dst': '10.7.5.67', 'ttl': 54, 'proto': 1}
+Reached the destination. Stopping traceroute.
