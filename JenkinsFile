@@ -1,0 +1,54 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('checks') {
+            steps {
+                script {
+                sh """
+                    echo "this is the ufw data ${sh(script: 'sudo ufw status', returnStdout: true).trim()}"
+                    echo "docker version ${sh(script: 'docker -v', returnStdout: true).trim()}"
+                """
+                }
+            }
+        }
+        stage('Clone Repository') {
+            steps {
+                script {
+                    //def gitRepoUrl = 'https://github.com/jonathan-99/modern-ui.git'
+                    //def repoDir = "${WORKSPACE}/repository"
+                    //echo "Cloning repository from $gitRepoUrl to $repoDir..."
+                    //sh "git clone $gitRepoUrl $repoDir"
+                    //sh "git update-index --chmod=+x $repoDir/jenkins/startup-and-install.sh"
+                    echo "here"
+                }
+            }
+        }
+        stage('Download docker and install repo') {
+            steps {
+                script {
+                    sh """
+                        file='jenkins/download_and_install.sh'
+                        chmod +x \$file
+                        filePermissions=\$(ls -l \$file)
+                        echo "File permissions: \$filePermissions"
+                        script -q -c "./\$file" /dev/null
+                    """
+                }
+            }
+        }
+        stage('unittests and coverage report') {
+            steps {
+                script {
+                    sh """
+                        u_file='jenkins/unittests_and_coverage_report.sh'
+                        chmod +x \$u_file
+                        filePermissions3=\$(ls -l \$u_file)
+                        echo 'File permissions: \$filePermissions3'
+                        script -q -c '.\$u_file' /dev/null
+                    """
+                }
+            }
+        }
+    }
+}
